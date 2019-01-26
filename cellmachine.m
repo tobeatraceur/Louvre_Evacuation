@@ -20,7 +20,7 @@ classdef cellmachine < handle
         count;%记录路径经过的次数
         
         ro=0.05;%挥发系数
-        epoch=50;%迭代轮数
+        epoch=13;%迭代轮数
         
     end
     
@@ -162,7 +162,7 @@ classdef cellmachine < handle
                 change_position = 0;%8个数表示改变的方向
                 %第一步迭代取最优次优
                 [~,num] = sort(present_cell.next_step,'descend');%num为在其中的序号，即下一步的方向
-                if first_flag <= 5 || first_flag == obj.epoch
+                if mod(first_flag,4) ~= 0 || first_flag == obj.epoch
                     for j = 1:8
                         if num(j) == 1 && obj.people_position(i,1)-1>0 && obj.people_position(i,2)-1>0
                             next_cell = obj.cellmap{obj.people_position(i,1)-1,obj.people_position(i,2)-1};
@@ -357,8 +357,8 @@ classdef cellmachine < handle
                         end                     
                     end
                     
-                    %死胡同
-                    if obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category == 1
+                    %死胡同,惩罚
+                    if obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category == 1 && obj.count(i,obj.path{i}(j,1),obj.path{i}(j,2),num) >= 5
                         %obj.cellmap{obj.path{i}(max_step+1,1),obj.path{i}(max_step+1,2)}.category = 0;
                         %obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category = 0;
                         obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) = obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) * (1-obj.ro)^2;
