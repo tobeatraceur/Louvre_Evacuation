@@ -113,7 +113,7 @@ classdef cellmachine < handle
             %obj.count = false(obj.peoplenum_total,obj.M,obj.N,obj.M,obj.N);
         end
         
-        function one_step(obj,first_flag)
+        function one_step(obj,first_flag,step_flag)%first_flag为轮次，step_flag为步数
             %每个元胞计算下一步
             %对每一个元胞调用计算函数/冲突处理/更新人的位置/记录路径
 
@@ -162,7 +162,7 @@ classdef cellmachine < handle
                 change_position = 0;%8个数表示改变的方向
                 %第一步迭代取最优次优
                 [~,num] = sort(present_cell.next_step,'descend');%num为在其中的序号，即下一步的方向
-                if mod(first_flag,4) ~= 0 || first_flag == obj.epoch
+                if first_flag == 1 || first_flag == obj.epoch || mod(step_flag,4) ~= 0
                     for j = 1:8
                         if num(j) == 1 && obj.people_position(i,1)-1>0 && obj.people_position(i,2)-1>0
                             next_cell = obj.cellmap{obj.people_position(i,1)-1,obj.people_position(i,2)-1};
@@ -288,20 +288,20 @@ classdef cellmachine < handle
             max_step = 150;
             while step < max_step %一轮上限
                 %延迟更新info
-                if mod(step,1) == 0
-                    for i=1:size(obj.cellmap)
-                        for j=1:8
-                            obj.cellmap{i}.info_using(j) = obj.cellmap{i}.info(j);
-                        end
-                    end
-                end
+                %if mod(step,1) == 0
+                    %for i=1:size(obj.cellmap)
+                        %for j=1:8
+                            %obj.cellmap{i}.info_using(j) = obj.cellmap{i}.info(j);
+                        %end
+                    %end
+                %end
                 
                 if obj.peoplenum_now == 0
                    step
                    break;
                 end
                 drawmap(obj)
-                obj.one_step(time);
+                obj.one_step(time,step);
                 step = step + 1;
                 %step
             end    
@@ -361,7 +361,7 @@ classdef cellmachine < handle
                     if obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category == 1 && obj.count(i,obj.path{i}(j,1),obj.path{i}(j,2),num) >= 5
                         %obj.cellmap{obj.path{i}(max_step+1,1),obj.path{i}(max_step+1,2)}.category = 0;
                         %obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category = 0;
-                        obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) = obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) * (1-obj.ro)^2;
+                        obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) = obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) * (1-obj.ro)^5;
                         continue;
                     end
                     
