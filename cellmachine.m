@@ -47,7 +47,7 @@ classdef cellmachine < handle
                 obj.M=size(map,1);
                 obj.N=size(map,2);
                 
-                peoplenum=3;%一层人数为容纳量（3600）的多少分之一
+                peoplenum=2;%一层人数为容纳量（3600）的多少分之一
                 N=randperm(obj.M*obj.N,ceil(obj.M*obj.M/peoplenum));
             end
             
