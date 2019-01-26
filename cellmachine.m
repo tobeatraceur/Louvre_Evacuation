@@ -20,7 +20,7 @@ classdef cellmachine < handle
         count;%记录路径经过的次数
         
         ro=0.05;%挥发系数
-        epoch=13;%迭代轮数
+        epoch=10;%迭代轮数
         
     end
     
@@ -47,7 +47,7 @@ classdef cellmachine < handle
                 obj.M=size(map,1);
                 obj.N=size(map,2);
                 
-                peoplenum=10;%一层人数为容纳量（3600）的多少分之一
+                peoplenum=3;%一层人数为容纳量（3600）的多少分之一
                 N=randperm(obj.M*obj.N,ceil(obj.M*obj.M/peoplenum));
             end
             
@@ -109,7 +109,7 @@ classdef cellmachine < handle
             end
             obj.peoplenum_total=size(obj.people_position,1);
             obj.peoplenum_now=size(obj.people_position,1);
-            obj.count = false(obj.peoplenum_total,obj.M,obj.N,8);
+            obj.count = zeros(obj.peoplenum_total,obj.M,obj.N,8);
             %obj.count = false(obj.peoplenum_total,obj.M,obj.N,obj.M,obj.N);
         end
         
@@ -358,10 +358,10 @@ classdef cellmachine < handle
                     end
                     
                     %死胡同,惩罚
-                    if obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category == 1 && obj.count(i,obj.path{i}(j,1),obj.path{i}(j,2),num) >= 5
+                    if  obj.count(i,obj.path{i}(j,1),obj.path{i}(j,2),num) >= 10
                         %obj.cellmap{obj.path{i}(max_step+1,1),obj.path{i}(max_step+1,2)}.category = 0;
                         %obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category = 0;
-                        obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) = obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) * (1-obj.ro)^5;
+                        obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) = obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) * (1-obj.ro);
                         continue;
                     end
                     
@@ -417,7 +417,7 @@ classdef cellmachine < handle
                 end
                 obj.people_position = obj.start_position;
                 obj.peoplenum_now = obj.peoplenum_total;
-                obj.count = false(obj.peoplenum_total,obj.M,obj.N,8);
+                obj.count = zeros(obj.peoplenum_total,obj.M,obj.N,8);
                 %obj.count = [];
             end
         end
