@@ -11,7 +11,8 @@ im=double(ppp==1);
 map=double(imresize(im,1/big_size)>0.8);
 imshow(map);
 door=[[36,91];[62,91]];
-map(door(1,1),door(1,2))=3;
-map(door(2,1),door(2,2))=3;
+for i=1:size(door,1)
+    map(door(i,1),door(i,2))=3;
+end
 
 
