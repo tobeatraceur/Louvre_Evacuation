@@ -2,7 +2,7 @@ function drawmap(cellmachine,n,num)
 %DRAWMAP 此处显示有关此函数的摘要
 %n为当前显示第几层，num为一共的层数
 h=5;
-%figure;
+figure(1);
 im=zeros(h*cellmachine.M,h*cellmachine.N,3);
 im=uint8(im);
 for i=1:cellmachine.M
