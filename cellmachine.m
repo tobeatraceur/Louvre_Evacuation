@@ -76,13 +76,13 @@ classdef cellmachine < handle
             %空地初始化
             for i=1:obj.M
                 for j=1:obj.N
-                    obj.cellmap{i,j}=mycell(i,j,0,obj.M+obj.N,0.3,1);%两个影响因子都初始化为0.5
-                    for k=1:size(obj.door_position,1)
-                        distance=abs(i-obj.door_position(k,1))+abs(j-obj.door_position(k,2));
-                        if distance<obj.cellmap{i,j}.cost
-                            obj.cellmap{i,j}.cost=distance;
-                        end
-                    end
+                    obj.cellmap{i,j}=mycell(i,j,0,3*obj.M+3*obj.N,0.3,1);%两个影响因子都初始化为0.5
+%                    for k=1:size(obj.door_position,1)
+%                        distance=abs(i-obj.door_position(k,1))+abs(j-obj.door_position(k,2));
+%                        if distance<obj.cellmap{i,j}.cost
+%                            obj.cellmap{i,j}.cost=distance;
+%                        end
+%                    end
                 end
             end
             
@@ -132,6 +132,9 @@ classdef cellmachine < handle
             obj.peoplenum_now=size(obj.people_position,1);
             obj.count = zeros(obj.peoplenum_total,obj.M,obj.N,8);
             %obj.count = false(obj.peoplenum_total,obj.M,obj.N,obj.M,obj.N);
+            
+            calculate(obj);
+            
         end
         
         function one_step(obj,first_flag,step_flag)%first_flag为轮次，step_flag为步数
