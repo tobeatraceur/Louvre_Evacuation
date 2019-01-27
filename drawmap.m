@@ -24,6 +24,18 @@ for i=1:cellmachine.M
             im(i*h-h+1:i*h,j*h-h+1:j*h,2)=255;
             im(i*h-h+1:i*h,j*h-h+1:j*h,3)=0;
         end
+        
+        if cellmachine.cellmap{i,j}.category==4
+            im(i*h-h+1:i*h,j*h-h+1:j*h,1)=0;
+            im(i*h-h+1:i*h,j*h-h+1:j*h,2)=0;
+            im(i*h-h+1:i*h,j*h-h+1:j*h,3)=255;
+        end
+        
+        if cellmachine.cellmap{i,j}.category==5
+            im(i*h-h+1:i*h,j*h-h+1:j*h,1)=255;
+            im(i*h-h+1:i*h,j*h-h+1:j*h,2)=255;
+            im(i*h-h+1:i*h,j*h-h+1:j*h,3)=0;
+        end
     end
 end
 
