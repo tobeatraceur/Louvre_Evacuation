@@ -24,14 +24,14 @@ classdef multistairs < handle
                 for j=1:size(obj.cellmachines{1}.door_position,1)
                     map(obj.cellmachines{1}.door_position(j,1),obj.cellmachines{1}.door_position(j,2))=0;
                 end
-                obj.cellmachines{i}.door_position=obj.elevator_position;
                 for j=1:size(obj.elevator_position,1)
                     map(obj.elevator_position(j,1),obj.elevator_position(j,2))=3;
                 end
+                obj.cellmachines{i}=cellmachine(map);
+                obj.cellmachines{i}.door_position=obj.elevator_position;
                 for j=1:size(obj.cellmachines{i}.target,1)
                     obj.cellmachines{i}.cellmap{obj.cellmachines{i}.target(j,1),obj.cellmachines{i}.target(j,2)}.category=0;
                 end
-                obj.cellmachines{i}=cellmachine(map);
                 obj.cellmachines{i}.target=[];
                 obj.cellmachines{i}.cellmap{obj.cellmachines{i}.start_door(1),obj.cellmachines{i}.start_door(2)}.category=0;
                 obj.cellmachines{i}.start_door=[];
@@ -59,7 +59,7 @@ classdef multistairs < handle
                     end
                     if k==1%从waitinglist中添加内容
                         if size(obj.waiting_list,1)~=0
-                            for j=1:size(obj.waiting_list,1)
+                            for j=size(obj.waiting_list,1):-1:1
                                 if obj.cellmachines{k}.cellmap{obj.waiting_list(j,1),obj.waiting_list(j,2)}.category==0
                                     obj.cellmachines{k}.cellmap{obj.waiting_list(j,1),obj.waiting_list(j,2)}.category=1;
                                     obj.cellmachines{k}.people_position=[obj.cellmachines{k}.people_position;obj.waiting_list(j,1),obj.waiting_list(j,2)];
