@@ -9,7 +9,7 @@ classdef multistairs < handle
     end
     
     methods
-        function obj = mutistairs(num)%输入楼层数
+        function obj = multistairs(num)%输入楼层数
             %第一层
             map=draw();
             obj.cellmachines{1}=cellmachine(map);

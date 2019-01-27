@@ -20,6 +20,8 @@ classdef mycell < handle
         
         alfa;%信息素影响因子
         beta;%启发函数影响因子
+        
+        parent=[0,0];%A*
     end
     
     methods
