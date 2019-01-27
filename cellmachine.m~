@@ -15,9 +15,9 @@ classdef cellmachine < handle
         disable_position;%残疾人初始坐标
         door_position;%门的初始坐标
         wall_position;%墙的初始坐标
-        %target=[20,80;21,80;19,80;20,81;20,79;19,79;19,81;21,79;21,81];%应急人员目的地
-        %start_door=[16,20];%应急人员进入的门
-        %security_position;%应急人员当前坐标
+        target=[20,80;21,80;19,80;20,81;20,79;19,79;19,81;21,79;21,81];%应急人员目的地
+        start_door=[16,20];%应急人员进入的门
+        security_position;%应急人员当前坐标
         
         path;%记录每一个人的路径
         count;%记录路径经过的次数
@@ -96,14 +96,13 @@ classdef cellmachine < handle
             for i=1:size(obj.wall_position,1)
                 obj.cellmap{obj.wall_position(i,1),obj.wall_position(i,2)}.category=2;
             end
-            %{
             for i=1:size(obj.target,1)
                 obj.cellmap{obj.target(i,1),obj.target(i,2)}.category=4;
             end
             obj.cellmap{obj.start_door(1),obj.start_door(2)}.category=5;
             
             obj.security_position = obj.start_door;
-            %}
+            
             for k=1:obj.M*obj.N/peoplenum
                 temp_n=mod(N(k),obj.N);
                 if temp_n==0
@@ -138,7 +137,7 @@ classdef cellmachine < handle
             %每个元胞计算下一步
             %对每一个元胞调用计算函数/冲突处理/更新人的位置/记录路径
 
-            %{
+            
             %应急人员
             if first_flag == obj.epoch && obj.arrived_flag == 0
             %if true
@@ -207,7 +206,6 @@ classdef cellmachine < handle
             end
             %应急人员部分结束
             
-            %}
             for i = 1:size(obj.people_position,1)
                 %已经出去的人
                 if obj.people_position(i,1)==-1
@@ -572,13 +570,12 @@ classdef cellmachine < handle
                 obj.people_position = obj.start_position;
                 obj.peoplenum_now = obj.peoplenum_total;
                 obj.count = zeros(obj.peoplenum_total,obj.M,obj.N,8);
-                %{
                 if i == obj.epoch - 1
                     obj.cellmap{obj.start_door(1),obj.start_door(2)}.category = 5;
                     obj.security_position = obj.start_door;
                     [~,~]=Astar(obj.cellmap);
                 end
-                %}
+                
                 %obj.count = [];
             end
             %保存信息素

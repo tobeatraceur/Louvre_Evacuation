@@ -40,7 +40,7 @@ classdef multistairs < handle
             end
             %初始化等候队列
             obj.waiting_list=[];
-
+            
         end
         
         
@@ -214,6 +214,13 @@ classdef multistairs < handle
                     obj.cellmachines{k}.path = {};
                     for j=1:size(obj.cellmachines{k}.start_position,1)
                         obj.cellmachines{k}.path{j} = [obj.cellmachines{k}.start_position(j,1),obj.cellmachines{k}.start_position(j,2)];
+                        for kk=1:size(obj.cellmachines{k}.disable_position,1)
+                            if obj.cellmachines{k}.start_position(j,1) == obj.cellmachines{k}.disable_position(kk,1) && obj.cellmachines{k}.start_position(j,2) == obj.cellmachines{k}.disable_position(kk,2)
+                                obj.cellmachines{k}.cellmap{obj.cellmachines{k}.start_position(j,1),obj.cellmachines{k}.start_position(j,2)}.category = 6;
+                            else
+                                obj.cellmachines{k}.cellmap{obj.cellmachines{k}.start_position(j,1),obj.cellmachines{k}.start_position(j,2)}.category = 1;
+                            end
+                        end
                     end
                     obj.cellmachines{k}.people_position = obj.cellmachines{k}.start_position;
                     obj.cellmachines{k}.peoplenum_now = obj.cellmachines{k}.peoplenum_total;

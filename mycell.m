@@ -34,7 +34,7 @@ classdef mycell < handle
             obj.cost = cost_input;
             obj.alfa = a;
             obj.beta = b;
-            obj.info=ones(8,1);
+            obj.info=0.4*ones(8,1);
             obj.info_using = obj.info;
             obj.stay_time = 0;
             %obj.Lk = 0;
