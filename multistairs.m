@@ -3,13 +3,13 @@ classdef multistairs < handle
     properties
         cellmachines;%多个楼层  n*1
         elevator_position%楼梯位置
-        waiting_list;%n-1个等候队列(矩阵构成的元胞)
+        waiting_list;%等候队列
         
         epoch=10;%迭代轮数
     end
     
     methods
-        function obj = mutistairs(num)%输入楼层数
+        function obj = multistairs(num)%输入楼层数
             %第一层
             map=draw();
             obj.cellmachines{1}=cellmachine(map);
@@ -28,6 +28,9 @@ classdef multistairs < handle
                 for j=1:size(obj.elevator_position,1)
                     map(obj.elevator_position(j,1),obj.elevator_position(j,2))=3;
                 end
+                for j=1:size(obj.cellmachines{i}.target,1)
+                    obj.cellmachines{i}.cellmap{obj.cellmachines{i}.target(j,1),obj.cellmachines{i}.target(j,2)}.category=0;
+                end
                 obj.cellmachines{i}=cellmachine(map);
                 obj.cellmachines{i}.target=[];
                 obj.cellmachines{i}.cellmap{obj.cellmachines{i}.start_door(1),obj.cellmachines{i}.start_door(2)}.category=0;
@@ -36,9 +39,8 @@ classdef multistairs < handle
                 obj.cellmachines{i}.arrived_flag=1;
             end
             %初始化等候队列
-            for i=1:num-1
-                obj.waiting_list{i}=[];
-            end
+            obj.waiting_list=[];
+
         end
         
         
@@ -55,17 +57,17 @@ classdef multistairs < handle
                         step
                         break;
                     end
-                    if k~=size(obj.cellmachines,2)%从waitinglist中添加内容
-                        if size(obj.waiting_list{k},1)~=0
-                            for j=1:size(obj.waiting_list{k},1)
-                                if obj.cellmachines{k}.cellmap{obj.waiting_list{k}(j,1),obj.waiting_list{k}(j,2)}.category==0
-                                    obj.cellmachines{k}.cellmap{obj.waiting_list{k}(j,1),obj.waiting_list{k}(j,2)}.category=1;
-                                    obj.cellmachines{k}.people_position=[obj.cellmachines{k}.people_position;obj.waiting_list{k}(j,1),obj.waiting_list{k}(j,2)];
+                    if k==1%从waitinglist中添加内容
+                        if size(obj.waiting_list,1)~=0
+                            for j=1:size(obj.waiting_list,1)
+                                if obj.cellmachines{k}.cellmap{obj.waiting_list(j,1),obj.waiting_list(j,2)}.category==0
+                                    obj.cellmachines{k}.cellmap{obj.waiting_list(j,1),obj.waiting_list(j,2)}.category=1;
+                                    obj.cellmachines{k}.people_position=[obj.cellmachines{k}.people_position;obj.waiting_list(j,1),obj.waiting_list(j,2)];
                                     obj.cellmachines{k}.peoplenum_total=obj.cellmachines{k}.peoplenum_total+1;
                                     obj.cellmachines{k}.peoplenum_now=obj.cellmachines{k}.peoplenum_now+1;
                                     s=size(obj.cellmachines{k}.people_position,1);
-                                    obj.cellmachines{k}.path{s}=[obj.waiting_list{k}(j,1),obj.waiting_list{k}(j,2)];
-                                    
+                                    obj.cellmachines{k}.path{s}=[obj.waiting_list(j,1),obj.waiting_list(j,2)];
+                                    obj.waiting_list(j,:)=[];
                                     %obj.cellmachines{k}.count=[obj.cellmachines{k}.count;zeros(1,obj.cellmachines{k}.M,obj.cellmachines{k}.N,8)];
                                 end
                             end
@@ -79,7 +81,7 @@ classdef multistairs < handle
                     if num_change>0&&k~=1%添加waitinglist
                         [~,find_person]=sort(double(obj.cellmachines{k}.people_position(:,2) == -1),'descend');
                         for j=1:num_change
-                            obj.waiting_list{k-1}=[obj.waiting_list{k-1};[obj.cellmachines{k}.path{find_person(j)}(end,1),obj.cellmachines{k}.path{find_person(j)}(end,2)]];
+                            obj.waiting_list=[obj.waiting_list;[obj.cellmachines{k}.path{find_person(j)}(end,1),obj.cellmachines{k}.path{find_person(j)}(end,2)]];
                         end
                     end
                 end
@@ -207,6 +209,7 @@ classdef multistairs < handle
                     obj.cellmachines{k}.count = zeros(total_num,obj.cellmachines{k}.M,obj.cellmachines{k}.N,8);
                 end
                 obj.one_iteration(i);
+                obj.waiting_list=[];
                 for k=size(obj.cellmachines,2):-1:1
                     obj.cellmachines{k}.path = {};
                     for j=1:size(obj.cellmachines{k}.start_position,1)
