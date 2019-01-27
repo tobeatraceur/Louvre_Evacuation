@@ -16,6 +16,7 @@ classdef mycell < handle
         info_using;%正在使用的信息素，延迟更新
         
         cost;%到最近的门的代价
+        stay_time;%在这里停留的时间
         
         alfa;%信息素影响因子
         beta;%启发函数影响因子
@@ -24,7 +25,7 @@ classdef mycell < handle
     methods
         function obj = mycell(startx,starty,category_input,cost_input,a,b)
             %定义一个元胞，参数为[坐标x,坐标y,类别]
-            %类别:0表示空地，1表示人，2表示障碍物，3表示门
+            %类别:0表示空地，1表示人，2表示障碍物，3表示门，4表示事发地点，5表示应急人员，6表示残疾人
             obj.x = startx;
             obj.y = starty;
             obj.category = category_input;
@@ -33,6 +34,7 @@ classdef mycell < handle
             obj.beta = b;
             obj.info=ones(8,1);
             obj.info_using = obj.info;
+            obj.stay_time = 0;
             %obj.Lk = 0;
         end
         

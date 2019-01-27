@@ -22,7 +22,7 @@ classdef cellmachine < handle
         count;%记录路径经过的次数
         
         ro=0.1;%挥发系数
-        epoch=3;%迭代轮数
+        epoch=1;%迭代轮数
         
         arrived_flag = 0;%应急人员是否到达
         
@@ -109,8 +109,14 @@ classdef cellmachine < handle
                 if obj.cellmap{ceil(N(k)/obj.N),temp_n}.category==0
                     obj.people_position=[obj.people_position;[ceil(N(k)/obj.N),temp_n]];
                     obj.start_position=[obj.start_position;[ceil(N(k)/obj.N),temp_n]];
-                    obj.cellmap{ceil(N(k)/obj.N),temp_n}.category=1;
+                    
+                    if mod(k,50) == 0
+                        obj.cellmap{ceil(N(k)/obj.N),temp_n}.category=6;
+                    else
+                        obj.cellmap{ceil(N(k)/obj.N),temp_n}.category=1;
+                    end
                 end
+                
             end
             
             
@@ -189,7 +195,7 @@ classdef cellmachine < handle
                     %cost=distance;
                 %end               
             end
-            
+            %应急人员部分结束
             
             for i = 1:size(obj.people_position,1)
                 %已经出去的人
@@ -231,11 +237,23 @@ classdef cellmachine < handle
                 if obj.people_position(i,1)==-1
                     continue;
                 end
+                
+                
                 present_cell = obj.cellmap{obj.people_position(i,1),obj.people_position(i,2)};
                 next_cell = present_cell;
                 change_flag = 0;%是否改变位置
                 change_position = 0;%8个数表示改变的方向
                 
+                %残疾人不进行迭代
+                if present_cell.category == 6 && present_cell.stay_time ~= 4
+                    present_cell.stay_time = present_cell.stay_time + 1;
+                    continue;
+                end
+                %if present_cell.category == 1 && present_cell.stay_time ~= 2
+                    %present_cell.stay_time = present_cell.stay_time + 1;
+                    %continue;
+                %end
+                    
                 
                 out_flag = 0;%是否出门
                 for k=1:size(obj.door_position,1)
@@ -350,10 +368,18 @@ classdef cellmachine < handle
                 end
             
                 if change_flag == 1
-                    present_cell.category = 0;
+                    
                     
                     %if out_flag == 0
+                    if present_cell.category == 1
                         next_cell.category = 1;
+                    end
+                    if present_cell.category == 6 
+                        
+                        next_cell.category = 6;
+                    end
+                    present_cell.category = 0;
+                    present_cell.stay_time = 0;
                         obj.people_position(i,1) = next_cell.x;
                         obj.people_position(i,2) = next_cell.y;
                         obj.path{i} = [obj.path{i};[next_cell.x,next_cell.y]];
