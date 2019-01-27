@@ -22,7 +22,7 @@ classdef cellmachine < handle
         count;%记录路径经过的次数
         
         ro=0.1;%挥发系数
-        epoch=1;%迭代轮数
+        epoch=3;%迭代轮数
         
         arrived_flag = 0;%应急人员是否到达
         
