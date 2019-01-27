@@ -1,4 +1,4 @@
-classdef mutistairs < handle
+classdef multistairs < handle
     
     properties
         cellmachines;%¶à¸öÂ¥²ã  n*1
