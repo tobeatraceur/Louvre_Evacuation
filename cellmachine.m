@@ -20,10 +20,11 @@ classdef cellmachine < handle
         %security_position;%应急人员当前坐标
         
         path;%记录每一个人的路径
+        Lk;%记录步数
         count;%记录路径经过的次数
         
         ro=0.1;%挥发系数
-        epoch=10;%迭代轮数
+        epoch=20;%迭代轮数
         
         arrived_flag = 0;%应急人员是否到达
         
@@ -47,20 +48,20 @@ classdef cellmachine < handle
                         end
                         if(map(i,j)==0)%墙
                             obj.wall_position=[obj.wall_position;[i,j]];
-                        end                             
+                        end
                     end
                 end
                 
                 obj.M=size(map,1);
                 obj.N=size(map,2);
                 
-                peoplenum=10;%一层人数为容纳量（3600）的多少分之一
+                peoplenum=3;%一层人数为容纳量（3600）的多少分之一
                 N=randperm(obj.M*obj.N,ceil(obj.M*obj.N/peoplenum));
             end
             
             
             
-
+            
             
             %设置初始坐标
             if  nargin==0
@@ -76,13 +77,13 @@ classdef cellmachine < handle
             %空地初始化
             for i=1:obj.M
                 for j=1:obj.N
-                    obj.cellmap{i,j}=mycell(i,j,0,3*obj.M+3*obj.N,0.3,1);%两个影响因子都初始化为0.5
-%                    for k=1:size(obj.door_position,1)
-%                        distance=abs(i-obj.door_position(k,1))+abs(j-obj.door_position(k,2));
-%                        if distance<obj.cellmap{i,j}.cost
-%                            obj.cellmap{i,j}.cost=distance;
-%                        end
-%                    end
+                    obj.cellmap{i,j}=mycell(i,j,0,3*obj.M+3*obj.N,0.5,0.5);%两个影响因子都初始化为0.5
+                    %                    for k=1:size(obj.door_position,1)
+                    %                        distance=abs(i-obj.door_position(k,1))+abs(j-obj.door_position(k,2));
+                    %                        if distance<obj.cellmap{i,j}.cost
+                    %                            obj.cellmap{i,j}.cost=distance;
+                    %                        end
+                    %                    end
                 end
             end
             
@@ -126,6 +127,7 @@ classdef cellmachine < handle
             
             %路径初始化
             for i=1:size(obj.people_position,1)
+                obj.Lk(i)=1;
                 obj.path{i} = [obj.people_position(i,1),obj.people_position(i,2)];
             end
             obj.peoplenum_total=size(obj.people_position,1);
@@ -138,9 +140,14 @@ classdef cellmachine < handle
         end
         
         function one_step(obj,first_flag,step_flag)%first_flag为轮次，step_flag为步数
+            for i=1:size(obj.people_position,1)
+                if obj.people_position(i,1)~=-1
+                    obj.Lk(i)=obj.Lk(i)+1;
+                end
+            end
             %每个元胞计算下一步
             %对每一个元胞调用计算函数/冲突处理/更新人的位置/记录路径
-
+            
             %{
             %应急人员
             if first_flag == obj.epoch && obj.arrived_flag == 0
@@ -206,7 +213,7 @@ classdef cellmachine < handle
                 end
                 %if distance<cost
                     %cost=distance;
-                %end               
+                %end
             end
             %应急人员部分结束
             
@@ -216,7 +223,7 @@ classdef cellmachine < handle
                 if obj.people_position(i,1)==-1
                     continue;
                 end
-                    
+                
                 cost=obj.M*obj.N*ones(8,1);
                 if obj.people_position(i,1)-1>0 && obj.people_position(i,2)-1>0
                     cost(1)=obj.cellmap{obj.people_position(i,1)-1,obj.people_position(i,2)-1}.cost;
@@ -264,10 +271,10 @@ classdef cellmachine < handle
                     continue;
                 end
                 %if present_cell.category == 1 && present_cell.stay_time ~= 2
-                    %present_cell.stay_time = present_cell.stay_time + 1;
-                    %continue;
+                %present_cell.stay_time = present_cell.stay_time + 1;
+                %continue;
                 %end
-                    
+                
                 
                 out_flag = 0;%是否出门
                 for k=1:size(obj.door_position,1)
@@ -291,8 +298,8 @@ classdef cellmachine < handle
                 
                 %第一步迭代取最优次优
                 [~,num] = sort(present_cell.next_step,'descend');%num为在其中的序号，即下一步的方向
-                if first_flag == 1 || first_flag == obj.epoch || mod(step_flag,4) ~= 0 
-                %if first_flag == 1 || first_flag == obj.epoch || mod(first_flag,4) == 0    
+                if first_flag == 1 || first_flag == obj.epoch || true
+                    %if first_flag == 1 || first_flag == obj.epoch || mod(first_flag,4) == 0
                     for j = 1:8
                         if num(j) == 1 && obj.people_position(i,1)-1>0 && obj.people_position(i,2)-1>0
                             next_cell = obj.cellmap{obj.people_position(i,1)-1,obj.people_position(i,2)-1};
@@ -318,7 +325,7 @@ classdef cellmachine < handle
                         if num(j) == 8 && obj.people_position(i,1)>0 && obj.people_position(i,2)-1>0
                             next_cell = obj.cellmap{obj.people_position(i,1),obj.people_position(i,2)-1};
                         end
-
+                        
                         if next_cell.category == 0 || next_cell.category == 3
                             change_flag = 1;
                             change_position = num(j);
@@ -327,9 +334,9 @@ classdef cellmachine < handle
                     end
                     
                     
-                %非第一步迭代    
+                    %非第一步迭代
                 else
-                
+                    
                     A=ones(1,100);%A为掷骰子
                     x=rand(1,100);
                     A(x<present_cell.next_step(1))=1;
@@ -338,8 +345,8 @@ classdef cellmachine < handle
                         sum_posibility = sum_posibility + present_cell.next_step(j);
                         A(x>=sum_posibility)=j+1;
                     end
-
-
+                    
+                    
                     position_tried = zeros(8,1);%标记是否尝试过
                     %找到没被占用的目的地
                     %for j = 1:8
@@ -371,7 +378,7 @@ classdef cellmachine < handle
                         if result == 8 && obj.people_position(i,1)>0 && obj.people_position(i,2)-1>0
                             next_cell = obj.cellmap{obj.people_position(i,1),obj.people_position(i,2)-1};
                         end
-
+                        
                         if next_cell.category == 0 || next_cell.category == 3
                             change_flag = 1;
                             change_position = result;
@@ -381,7 +388,7 @@ classdef cellmachine < handle
                     end
                     
                 end
-            
+                
                 if change_flag == 1
                     
                     
@@ -389,20 +396,20 @@ classdef cellmachine < handle
                     if present_cell.category == 1
                         next_cell.category = 1;
                     end
-                    if present_cell.category == 6                         
+                    if present_cell.category == 6
                         next_cell.category = 6;
                     end
                     present_cell.category = 0;
                     present_cell.stay_time = 0;
-                        obj.people_position(i,1) = next_cell.x;
-                        obj.people_position(i,2) = next_cell.y;
-                        obj.path{i} = [obj.path{i};[next_cell.x,next_cell.y]];
-                        %obj.count = [obj.count;[]]
-                        obj.count(k,present_cell.x,present_cell.y,change_position) = obj.count(k,present_cell.x,present_cell.y,change_position) + 1;
-                        %obj.count(k,present_cell.x,present_cell.y,next_cell.x,next_cell.y) = obj.count(k,present_cell.x,present_cell.y,next_cell.x,next_cell.y) + 1;
-                    %end            
-                end                                  
-            end            
+                    obj.people_position(i,1) = next_cell.x;
+                    obj.people_position(i,2) = next_cell.y;
+                    obj.path{i} = [obj.path{i};[next_cell.x,next_cell.y]];
+                    %obj.count = [obj.count;[]]
+                    obj.count(k,present_cell.x,present_cell.y,change_position) = obj.count(k,present_cell.x,present_cell.y,change_position) + 1;
+                    %obj.count(k,present_cell.x,present_cell.y,next_cell.x,next_cell.y) = obj.count(k,present_cell.x,present_cell.y,next_cell.x,next_cell.y) + 1;
+                    %end
+                end
+            end
         end
         
         function [time_05,time_075]=one_iteration(obj,time)
@@ -414,19 +421,19 @@ classdef cellmachine < handle
             time_05=0;
             time_075=0;
             while step < max_step %一轮上限
-            %while true
+                %while true
                 %延迟更新info
                 %if mod(step,1) == 0
-                    %for i=1:size(obj.cellmap)
-                        %for j=1:8
-                            %obj.cellmap{i}.info_using(j) = obj.cellmap{i}.info(j);
-                        %end
-                    %end
+                %for i=1:size(obj.cellmap)
+                %for j=1:8
+                %obj.cellmap{i}.info_using(j) = obj.cellmap{i}.info(j);
+                %end
+                %end
                 %end
                 
                 if obj.peoplenum_now == 0
-                   step
-                   break;
+                    step
+                    break;
                 end
                 drawmap(obj,1,1)
                 obj.one_step(time,step);
@@ -441,8 +448,8 @@ classdef cellmachine < handle
                     if time_075==0
                         time_075=step;
                     end
-                end                
-            end    
+                end
+            end
             
             
             
@@ -463,7 +470,7 @@ classdef cellmachine < handle
                     if obj.path{i}(j,1) == obj.path{i}(j+1,1) && obj.path{i}(j,2) == obj.path{i}(j+1,2)
                         continue;
                     end
-                    if visited(obj.path{i}(j,1),obj.path{i}(j,2),obj.path{i}(j+1,1),obj.path{i}(j+1,2)) == 1 
+                    if visited(obj.path{i}(j,1),obj.path{i}(j,2),obj.path{i}(j+1,1),obj.path{i}(j+1,2)) == 1
                         continue;
                     end
                     num = 0;
@@ -476,7 +483,7 @@ classdef cellmachine < handle
                         end
                         if obj.path{i}(j,2)+1 == obj.path{i}(j+1,2)
                             num = 3;
-                        end                     
+                        end
                     end
                     if obj.path{i}(j,1) == obj.path{i}(j+1,1)
                         if obj.path{i}(j,2)-1 == obj.path{i}(j+1,2)
@@ -487,7 +494,7 @@ classdef cellmachine < handle
                         end
                         if obj.path{i}(j,2)+1 == obj.path{i}(j+1,2)
                             num = 4;
-                        end                     
+                        end
                     end
                     if obj.path{i}(j,1)+1 == obj.path{i}(j+1,1)
                         if obj.path{i}(j,2)-1 == obj.path{i}(j+1,2)
@@ -498,7 +505,7 @@ classdef cellmachine < handle
                         end
                         if obj.path{i}(j,2)+1 == obj.path{i}(j+1,2)
                             num = 5;
-                        end                     
+                        end
                     end
                     
                     %死胡同,惩罚
@@ -514,14 +521,14 @@ classdef cellmachine < handle
                     
                     delta_info = 0;
                     for k=1:size(obj.people_position,1)
-                       %change = change + 1
+                        %change = change + 1
                         %n=0;%n为该路径在k这个人的路径中出现的次数
                         %for m=2:size(obj.path{k},1)-1
-                           % if obj.path{k}(m,1) == obj.path{i}(j,1) && obj.path{k}(m,2) == obj.path{i}(j,2)
-                                %if (obj.path{k}(m-1,1) == obj.path{i}(j+1,1) && obj.path{k}(m-1,2) == obj.path{i}(j+1,2)) || (obj.path{k}(m+1,1) == obj.path{i}(j+1,1) && obj.path{k}(m+1,2) == obj.path{i}(j+1,2))
-                                   % n = n + 1;
-                                %end
-                            %end
+                        % if obj.path{k}(m,1) == obj.path{i}(j,1) && obj.path{k}(m,2) == obj.path{i}(j,2)
+                        %if (obj.path{k}(m-1,1) == obj.path{i}(j+1,1) && obj.path{k}(m-1,2) == obj.path{i}(j+1,2)) || (obj.path{k}(m+1,1) == obj.path{i}(j+1,1) && obj.path{k}(m+1,2) == obj.path{i}(j+1,2))
+                        % n = n + 1;
+                        %end
+                        %end
                         %end
                         %n = obj.count(k,obj.path{i}(j,1),obj.path{i}(j,2),obj.path{i}(j+1,1),obj.path{i}(j+1,2)) + obj.count(k,obj.path{i}(j+1,1),obj.path{i}(j+1,2),obj.path{i}(j,1),obj.path{i}(j,2));
                         num_reverse = mod(num+4,8);
@@ -531,7 +538,7 @@ classdef cellmachine < handle
                         n = obj.count(k,obj.path{i}(j,1),obj.path{i}(j,2),num) + obj.count(k,obj.path{i}(j+1,1),obj.path{i}(j+1,2),num_reverse);
                         
                         if n ~= 0
-                            delta_info = delta_info + 1/size(obj.path{k},1)*0.5^(n-1);
+                            delta_info = delta_info + 1/obj.Lk(k)/obj.Lk(k)*0.5^(n-1);
                         end
                     end
                     visited(obj.path{i}(j,1),obj.path{i}(j,2),obj.path{i}(j+1,1),obj.path{i}(j+1,2)) = 1;
@@ -541,13 +548,13 @@ classdef cellmachine < handle
                 end
                 
                 if obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category == 1 || obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category == 6
-                        %obj.cellmap{obj.path{i}(max_step+1,1),obj.path{i}(max_step+1,2)}.category = 0;
-                obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category = 0;
+                    %obj.cellmap{obj.path{i}(max_step+1,1),obj.path{i}(max_step+1,2)}.category = 0;
+                    obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category = 0;
                 end
                 
             end
             
-      
+            
         end
         
         function run(obj)
@@ -557,9 +564,12 @@ classdef cellmachine < handle
             time_075=[];
             for i = 1:obj.epoch
                 i
+                for i=1:size(obj.people_position,1)
+                    obj.Lk(i)=1;
+                end
                 [t05,t075]=obj.one_iteration(i);
                 time_05=[time_05,t05];
-                time_075=[time_075,t075];                
+                time_075=[time_075,t075];
                 obj.path = {};
                 for j=1:size(obj.people_position,1)
                     obj.path{j} = [obj.start_position(j,1),obj.start_position(j,2)];
