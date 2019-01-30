@@ -55,7 +55,11 @@ classdef cellmachine < handle
                 obj.M=size(map,1);
                 obj.N=size(map,2);
                 
+<<<<<<< HEAD
                 peoplenum=4;%一层人数为容纳量（3600）的多少分之一
+=======
+                peoplenum=2;%一层人数为容纳量（3600）的多少分之一
+>>>>>>> 8e82f95bd5f4e75b3cfaa4532fbd10931cf87f69
                 N=randperm(obj.M*obj.N,ceil(obj.M*obj.N/peoplenum));
             end
             
@@ -311,6 +315,10 @@ classdef cellmachine < handle
                 next_cell = present_cell;
                 change_flag = 0;%是否改变位置
                 change_position = 0;%8个数表示改变的方向
+<<<<<<< HEAD
+=======
+                
+>>>>>>> 8e82f95bd5f4e75b3cfaa4532fbd10931cf87f69
                 %{
                 %残疾人不进行迭代
                 if present_cell.category == 6 && present_cell.stay_time ~= 4
@@ -346,8 +354,14 @@ classdef cellmachine < handle
                 
                 %第一步迭代取最优次优
                 [~,num] = sort(present_cell.next_step,'descend');%num为在其中的序号，即下一步的方向
+<<<<<<< HEAD
                 %if first_flag == 1 || first_flag == obj.epoch || true
                 if first_flag == 1 || first_flag == obj.epoch || mod(first_flag,2) ~= 0 || mod(step_flag,4) ~= 0
+=======
+                if first_flag == 1 || first_flag == obj.epoch || mod(step_flag,5) ~= 0
+                %if  first_flag == obj.epoch || mod(step_flag,4) == 0||mod(step_flag,4) == 1
+                    %if first_flag == 1 || first_flag == obj.epoch || mod(first_flag,4) == 0
+>>>>>>> 8e82f95bd5f4e75b3cfaa4532fbd10931cf87f69
                     for j = 1:8
                         if num(j) == 1 && obj.people_position(i,1)-1>0 && obj.people_position(i,2)-1>0
                             next_cell = obj.cellmap{obj.people_position(i,1)-1,obj.people_position(i,2)-1};
@@ -465,7 +479,7 @@ classdef cellmachine < handle
             %迭代一步/更新信息素
             step = 0;
             %迭代一轮
-            max_step = 250;
+            max_step = 450;
             time_05=0;
             time_075=0;
             while step < max_step %一轮上限
@@ -614,6 +628,7 @@ classdef cellmachine < handle
             time_05=[];
             time_075=[];
             for i = 1:obj.epoch
+                
                 i
                 for j=1:size(obj.people_position,1)
                     obj.Lk(j)=1;
@@ -657,9 +672,7 @@ classdef cellmachine < handle
             save('info','cellinfo');
             x=1:obj.epoch;
             figure(2);plot(x,time_05,'-*b',x,time_075,'-or');
-            
         end
-        
     end
 end
 
