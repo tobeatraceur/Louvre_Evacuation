@@ -284,16 +284,17 @@ openlen=0;
 
    end 
 end
-
+%{
 while true
        row = map{endrow,endcol}.parent(1);
        col = map{endrow,endcol}.parent(2);
        endrow = row;
        endcol = col;
        %[row,col]
-       img(row, col) = 7;
-       imagesc(img*10);
+       %img(row, col) = 7;
+       %imagesc(img*10);
        if row == startrow && col == startcol
            break;
        end
 end
+%}

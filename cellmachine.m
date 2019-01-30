@@ -15,16 +15,16 @@ classdef cellmachine < handle
         disable_position;%残疾人初始坐标
         door_position;%门的初始坐标
         wall_position;%墙的初始坐标
-        %target=[20,80;21,80;19,80;20,81;20,79;19,79;19,81;21,79;21,81];%应急人员目的地
-        %start_door=[16,20];%应急人员进入的门
-        %security_position;%应急人员当前坐标
+        target=[20,80;21,80;19,80;20,81;20,79;19,79;19,81;21,79;21,81];%应急人员目的地
+        start_door=[30,165];%应急人员进入的门
+        security_position;%应急人员当前坐标
         
         path;%记录每一个人的路径
         Lk;%记录步数
         count;%记录路径经过的次数
         
         ro=0.1;%挥发系数
-        epoch=20;%迭代轮数
+        epoch=1;%迭代轮数
         
         arrived_flag = 0;%应急人员是否到达
         
@@ -55,7 +55,7 @@ classdef cellmachine < handle
                 obj.M=size(map,1);
                 obj.N=size(map,2);
                 
-                peoplenum=3;%一层人数为容纳量（3600）的多少分之一
+                peoplenum=4;%一层人数为容纳量（3600）的多少分之一
                 N=randperm(obj.M*obj.N,ceil(obj.M*obj.N/peoplenum));
             end
             
@@ -97,7 +97,7 @@ classdef cellmachine < handle
             for i=1:size(obj.wall_position,1)
                 obj.cellmap{obj.wall_position(i,1),obj.wall_position(i,2)}.category=2;
             end
-            %{
+            
             for i=1:size(obj.target,1)
                 obj.cellmap{obj.target(i,1),obj.target(i,2)}.category=4;
             end
@@ -114,7 +114,7 @@ classdef cellmachine < handle
                     obj.people_position=[obj.people_position;[ceil(N(k)/obj.N),temp_n]];
                     obj.start_position=[obj.start_position;[ceil(N(k)/obj.N),temp_n]];
                     
-                    if mod(k,50) == 0
+                    if mod(k,20) == 0
                         obj.cellmap{ceil(N(k)/obj.N),temp_n}.category=6;
                         obj.disable_position=[obj.disable_position;[ceil(N(k)/obj.N),temp_n]];
                     else
@@ -148,15 +148,62 @@ classdef cellmachine < handle
             %每个元胞计算下一步
             %对每一个元胞调用计算函数/冲突处理/更新人的位置/记录路径
             
-            %{
+            
             %应急人员
             if first_flag == obj.epoch && obj.arrived_flag == 0
             %if true
                 %cost = 500;%r认为500很大
                 present_cell = obj.cellmap{obj.security_position(1),obj.security_position(2)};
                 next_cell = present_cell;
-                if obj.cellmap{present_cell.parent(1),present_cell.parent(2)}.category == 0 || obj.cellmap{present_cell.parent(1),present_cell.parent(2)}.category == 4
-                    next_cell = obj.cellmap{present_cell.parent(1),present_cell.parent(2)};
+                
+                if present_cell.parent(1) ~= 0
+                    if obj.cellmap{present_cell.parent(1),present_cell.parent(2)}.category == 0 || obj.cellmap{present_cell.parent(1),present_cell.parent(2)}.category == 4
+                        next_cell = obj.cellmap{present_cell.parent(1),present_cell.parent(2)};
+                    else
+                        distance = [];
+                        for i=-1:1
+                            for j=-1:1
+                                new_distance = abs(obj.security_position(1)+i-obj.target(1,1))+abs(obj.security_position(2)+j-obj.target(1,2));
+                                distance=[distance,new_distance];
+                            end
+                        end
+                        [~,num] = sort(distance);
+
+                        for j = 1:9
+                            if num(j) == 1 && obj.security_position(1)-1>0 && obj.security_position(2)-1>0
+                                next_cell = obj.cellmap{obj.security_position(1)-1,obj.security_position(2)-1};
+                            end
+                            if num(j) == 2 && obj.security_position(1)-1>0 && obj.security_position(2)<=obj.N
+                                next_cell = obj.cellmap{obj.security_position(1)-1,obj.security_position(2)};
+                            end
+                            if num(j) == 3 && obj.security_position(1)-1>0 && obj.security_position(2)+1<=obj.N
+                                next_cell = obj.cellmap{obj.security_position(1)-1,obj.security_position(2)+1};
+                            end
+                            if num(j) == 4 && obj.security_position(1)>0 && obj.security_position(2)-1>=obj.N
+                                next_cell = obj.cellmap{obj.security_position(1),obj.security_position(2)-1};
+                            end
+
+                            if num(j) == 6 && obj.security_position(1)<=obj.M && obj.security_position(2)+1<=obj.N
+                                next_cell = obj.cellmap{obj.security_position(1),obj.security_position(2)+1};
+                            end
+                            if num(j) == 7 && obj.security_position(1)+1<=obj.M && obj.security_position(2)-1>0
+                                next_cell = obj.cellmap{obj.security_position(1)+1,obj.security_position(2)-1};
+                            end
+                            if num(j) == 8 && obj.security_position(1)+1<=obj.M && obj.security_position(2)>0
+                                next_cell = obj.cellmap{obj.security_position(1)+1,obj.security_position(2)};
+                            end
+                            if num(j) == 9 && obj.security_position(1)+1<=obj.M && obj.security_position(2)+1<=obj.N
+                                next_cell = obj.cellmap{obj.security_position(1)+1,obj.security_position(2)+1};
+                            end
+
+                            if next_cell.category == 0 || next_cell.category == 4
+                                %change_flag = 1;
+                                %change_position = num(j);
+                                break;
+                            end
+                        end
+                    end
+                    
                 else
                     distance = [];
                     for i=-1:1
@@ -207,7 +254,7 @@ classdef cellmachine < handle
                     obj.arrived_flag = 1;
                 else
                     next_cell.category = 5;
-                    obj.cellmap{obj.security_position(1),obj.security_position(2)}.category = 0;
+                    obj.cellmap{obj.security_position(1),obj.security_position(2)}.category = 5;
                     obj.security_position(1) = next_cell.x;
                     obj.security_position(2) = next_cell.y;
                 end
@@ -264,12 +311,13 @@ classdef cellmachine < handle
                 next_cell = present_cell;
                 change_flag = 0;%是否改变位置
                 change_position = 0;%8个数表示改变的方向
-                
+                %{
                 %残疾人不进行迭代
                 if present_cell.category == 6 && present_cell.stay_time ~= 4
                     present_cell.stay_time = present_cell.stay_time + 1;
                     continue;
                 end
+                %}
                 %if present_cell.category == 1 && present_cell.stay_time ~= 2
                 %present_cell.stay_time = present_cell.stay_time + 1;
                 %continue;
@@ -298,8 +346,8 @@ classdef cellmachine < handle
                 
                 %第一步迭代取最优次优
                 [~,num] = sort(present_cell.next_step,'descend');%num为在其中的序号，即下一步的方向
-                if first_flag == 1 || first_flag == obj.epoch || true
-                    %if first_flag == 1 || first_flag == obj.epoch || mod(first_flag,4) == 0
+                %if first_flag == 1 || first_flag == obj.epoch || true
+                if first_flag == 1 || first_flag == obj.epoch || mod(first_flag,2) ~= 0 || mod(step_flag,4) ~= 0
                     for j = 1:8
                         if num(j) == 1 && obj.people_position(i,1)-1>0 && obj.people_position(i,2)-1>0
                             next_cell = obj.cellmap{obj.people_position(i,1)-1,obj.people_position(i,2)-1};
@@ -466,7 +514,9 @@ classdef cellmachine < handle
             %change = 0;
             visited = zeros(obj.M,obj.N,obj.M,obj.N);
             for i=1:size(obj.people_position,1)
-                for j=1:size(obj.path{i},1)-1
+                %for j=1:size(obj.path{i},1)-1
+                punish_flag = 0;%是否惩罚
+                for j=size(obj.path{i},1)-1:-1:1
                     if obj.path{i}(j,1) == obj.path{i}(j+1,1) && obj.path{i}(j,2) == obj.path{i}(j+1,2)
                         continue;
                     end
@@ -509,12 +559,13 @@ classdef cellmachine < handle
                     end
                     
                     %死胡同,惩罚
-                    if  obj.count(i,obj.path{i}(j,1),obj.path{i}(j,2),num) >= 10
+                    if  obj.count(i,obj.path{i}(j,1),obj.path{i}(j,2),num) >= 5 || punish_flag == 1
                         %obj.cellmap{obj.path{i}(max_step+1,1),obj.path{i}(max_step+1,2)}.category = 0;
                         %obj.cellmap{obj.path{i}(end,1),obj.path{i}(end,2)}.category = 0;
                         
-                        %obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) = obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) * (1-obj.ro);
-                        %continue;
+                            obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) = obj.cellmap{obj.path{i}(j,1),obj.path{i}(j,2)}.info(num) * (1-obj.ro)^2;
+                        punish_flag = 1;
+                        continue;
                     end
                     
                     
@@ -564,9 +615,16 @@ classdef cellmachine < handle
             time_075=[];
             for i = 1:obj.epoch
                 i
-                for i=1:size(obj.people_position,1)
-                    obj.Lk(i)=1;
+                for j=1:size(obj.people_position,1)
+                    obj.Lk(j)=1;
                 end
+                
+                if i == obj.epoch 
+                    obj.cellmap{obj.start_door(1),obj.start_door(2)}.category = 5;
+                    obj.security_position = obj.start_door;
+                    [~,~]=Astar(obj.cellmap)
+                end
+                
                 [t05,t075]=obj.one_iteration(i);
                 time_05=[time_05,t05];
                 time_075=[time_075,t075];
@@ -585,12 +643,8 @@ classdef cellmachine < handle
                 obj.people_position = obj.start_position;
                 obj.peoplenum_now = obj.peoplenum_total;
                 obj.count = zeros(obj.peoplenum_total,obj.M,obj.N,8);
-                %{
-                if i == obj.epoch - 1
-                    obj.cellmap{obj.start_door(1),obj.start_door(2)}.category = 5;
-                    obj.security_position = obj.start_door;
-                    [~,~]=Astar(obj.cellmap);
-                end
+                
+                
                 %}
                 %obj.count = [];
             end
